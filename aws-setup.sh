@@ -51,7 +51,7 @@ lambda_response="$(
     --function-name "$LAMBDA_FUNCTION_NAME" 2>/dev/null || \
   aws lambda create-function \
     --function-name "$LAMBDA_FUNCTION_NAME" \
-    --runtime "nodejs6.10" \
+    --runtime "$LAMBDA_FUNCTION_RUNTIME" \
     --handler "$LAMBDA_FUNCTION_HANDLER" \
     --role "$ROLE_ARN" \
     --zip-file "fileb://lambda-build.zip"
@@ -63,11 +63,11 @@ echo
 echo "Updating $LAMBDA_FUNCTION_NAME lambda function configuration ..."
 aws lambda update-function-configuration \
   --function-name "$LAMBDA_FUNCTION_NAME" \
-  --timeout 10 \
-  --memory-size 1024 \
-  --description "Chess AI lambda function"
+  --timeout "$LAMBDA_FUNCTION_TIMEOUT" \
+  --memory-size "$LAMBDA_FUNCTION_MEMORY" \
+  --description "$LAMBDA_FUNCTION_DESCRIPTION"
 
-echo "Done!"
+echo 'Done!'
 
 echo "
 Now set up the following:
