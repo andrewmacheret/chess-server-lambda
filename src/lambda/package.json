@@ -4,7 +4,7 @@
   "description": "A lambda server that provides a best move chess API",
   "main": "chess-server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test.js"
   },
   "repository": {
     "type": "git",

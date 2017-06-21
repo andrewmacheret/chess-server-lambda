@@ -13,4 +13,4 @@ aws lambda update-function-code \
   --zip-file "fileb://lambda-build.zip"
 
 echo
-echo "Done!"
+echo 'Done!'

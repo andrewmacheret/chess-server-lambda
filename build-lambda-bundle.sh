@@ -9,14 +9,14 @@ cd lambda-build
 echo "Running npm install ..."
 npm install
 
-#echo 'Testing ...'
-#python test.py || {
-#  echo 'Tests failed, cleaning up ...'
-#  cd - >/dev/null
-#  rm -rf lambda-build
-#  exit 1
-#}
-#echo 'Tests passed!'
+echo 'Testing ...'
+npm test || {
+ echo 'Tests failed, cleaning up ...'
+ cd - >/dev/null
+ rm -rf lambda-build
+ exit 1
+}
+echo 'Tests passed!'
 
 echo "Zipping files ..."
 zip -q -r ../lambda-build.zip .
