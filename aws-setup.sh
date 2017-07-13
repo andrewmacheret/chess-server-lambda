@@ -56,7 +56,7 @@ lambda_response="$(
     --role "$ROLE_ARN" \
     --zip-file "fileb://lambda-build.zip"
 )"
-LAMBDA_FUNCTION_ARN=$( echo $lambda_response | python -c "import sys, json; print(json.load(sys.stdin)['Configuration']['FunctionArn'])" )
+LAMBDA_FUNCTION_ARN=$( echo $lambda_response | python -c "import sys, json; x=json.load(sys.stdin); print(x.get('Configuration',x)['FunctionArn'])" )
 echo "export LAMBDA_FUNCTION_ARN=$LAMBDA_FUNCTION_ARN" >> .env
 
 echo
