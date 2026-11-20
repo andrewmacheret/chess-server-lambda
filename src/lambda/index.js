@@ -11,6 +11,16 @@ const startFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 // board, side to move, castling, en passant, then optional move counters
 const fenPattern = /^[pnbrqkPNBRQK1-8]+(\/[pnbrqkPNBRQK1-8]+){7} [wb] (-|[KQkq]{1,4}) (-|[a-h][1-8])( \d+ \d+)?$/;
 
+// Stockfish crashes on an en passant square on the wrong rank, so drop it
+const fixEnPassant = (fen) => {
+  const parts = fen.split(' ');
+  const expectedRank = parts[1] === 'w' ? '6' : '3';
+  if (parts[3] !== '-' && parts[3][1] !== expectedRank) {
+    parts[3] = '-';
+  }
+  return parts.join(' ');
+};
+
 const enginePath = stockfish.findEngine('lite-single');
 
 // Stockfish runs in its own process because some bad positions make it crash.
@@ -52,7 +62,7 @@ const getEngine = () => {
 export const handler = async (event) => {
   console.log('called with event:', event);
 
-  const fen = (event.fen || '').trim();
+  let fen = (event.fen || '').trim();
   if (!fen) {
     const suggestion = `/moves?fen=${encodeURIComponent(startFen)}&depth=${defaultDepth}`;
     throw new Error(`Parameter 'fen' is required, try ${suggestion}`);
@@ -60,6 +70,7 @@ export const handler = async (event) => {
   if (!fenPattern.test(fen)) {
     throw new Error(`Parameter 'fen' is not a valid FEN: ${fen}`);
   }
+  fen = fixEnPassant(fen);
 
   const depth = Math.min(parseInt(event.depth, 10) || defaultDepth, maxDepth);
 

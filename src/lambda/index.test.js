@@ -58,10 +58,28 @@ test('rejects things that are not a fen', async () => {
   await assert.rejects(handler({ fen: `${startFen}\nquit` }), /not a valid FEN/);
 });
 
+test('ignores an en passant square on the wrong rank', async () => {
+  for (const fen of [
+    'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e4 0 1',
+    'rnbqk2r/pp3ppp/3ppn2/3p4/2PP4/4PN2/PP3PPP/RN1QKB1R b kqKQ c4 0 6',
+  ]) {
+    const result = await handler({ fen });
+    assert.match(result.bestmove, /^[a-h][1-8][a-h][1-8]$/);
+  }
+});
+
+test('accepts a valid en passant square', async () => {
+  for (const fen of [
+    'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
+    'rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2',
+  ]) {
+    const result = await handler({ fen });
+    assert.match(result.bestmove, /^[a-h][1-8][a-h][1-8]$/);
+  }
+});
+
 test('recovers after stockfish crashes on a bad position', async () => {
   await assert.rejects(handler({ fen: '8/8/8/8/8/8/8/8 w - - 0 1' }), /Stockfish crashed/);
-  const oddFen = 'rnbqk2r/pp3ppp/3ppn2/3p4/2PP4/4PN2/PP3PPP/RN1QKB1R b kqKQ c4 0 6';
-  await assert.rejects(handler({ fen: oddFen }), /Stockfish crashed/);
   const result = await handler({ fen: startFen });
   assert.match(result.bestmove, /^[a-h][1-8][a-h][1-8]$/);
 });
