@@ -1,0 +1,76 @@
+name: Test and deploy
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FUNCTION_NAME: ChessAI
+  RUNTIME: nodejs24.x
+  API_URL: https://chess.andrewmacheret.com
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/lambda
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: src/lambda/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: src/lambda/package-lock.json
+      # The stockfish package has five engine builds (about 200 MB). Only the lite single-threaded one is used.
+      - name: Build zip
+        working-directory: src/lambda
+        run: |
+          npm ci --omit=dev
+          find node_modules/stockfish/bin -type f ! -name '*-lite-single.*' -delete
+          zip -qr ../../lambda.zip index.js package.json node_modules
+          ls -lh ../../lambda.zip
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      # AWS blocks code updates on old runtimes, so set the runtime first
+      - name: Update runtime and settings
+        run: |
+          aws lambda update-function-configuration --function-name "$FUNCTION_NAME" \
+            --runtime "$RUNTIME" --handler index.handler --timeout 10 --memory-size 1536 \
+            --output text --query LastUpdateStatus
+          aws lambda wait function-updated --function-name "$FUNCTION_NAME"
+      - name: Update code
+        run: |
+          aws lambda update-function-code --function-name "$FUNCTION_NAME" \
+            --zip-file fileb://lambda.zip \
+            --output text --query LastUpdateStatus
+          aws lambda wait function-updated --function-name "$FUNCTION_NAME"
+      - name: Smoke test
+        run: |
+          fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+          curl -sSf -G "$API_URL/moves" --data-urlencode "fen=$fen" | tee /dev/stderr \
+            | jq -e '.bestmove | test("^[a-h][1-8][a-h][1-8]")'

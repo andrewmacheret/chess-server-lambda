@@ -1,23 +1,23 @@
 {
-  "name": "chess-server",
-  "version": "1.0.0",
-  "description": "A lambda server that provides a best move chess API",
-  "main": "chess-server.js",
+  "name": "chess-server-lambda",
+  "version": "2.0.0",
+  "description": "A Lambda function that provides a best move chess API",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "node --test"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/andrewmacheret/chess-server.git"
+    "url": "git+https://github.com/andrewmacheret/chess-server-lambda.git"
   },
   "author": "Andrew Macheret",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/andrewmacheret/chess-server/issues"
+  "engines": {
+    "node": ">=24"
   },
-  "homepage": "https://github.com/andrewmacheret/chess-server#readme",
   "dependencies": {
-    "stockfish": "^6.0.5",
-    "urlencode": "^1.1.0"
+    "stockfish": "^19.0.1"
   }
 }
