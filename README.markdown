@@ -1,5 +1,7 @@
 # Chess AI using Node.js, Stockfish, and AWS Lambda
 
+> **Archived.** The chess AI now runs in the browser. See [andrewmacheret/chess](https://github.com/andrewmacheret/chess). The `ChessAI` Lambda, its API Gateway API, and `chess.andrewmacheret.com` have been deleted.
+
 [![License](https://img.shields.io/badge/license-MIT-lightgray.svg)](https://github.com/andrewmacheret/chess-server-lambda/blob/master/LICENSE.md)
 
 Back-end chess AI for [andrewmacheret/chess](https://github.com/andrewmacheret/chess). It runs [Stockfish 19](https://github.com/nmrugg/stockfish.js) (the lite, single-threaded WebAssembly build) in the Lambda function `ChessAI` on Node.js 24.
